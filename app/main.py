@@ -31,7 +31,7 @@ app.add_exception_handler(Exception, generic_exception_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
-    allow_origin_regex=r"https://nutri-well-frontend01.*\.vercel\.app",
+    allow_origin_regex=r"https://(nutri-well.*|nutriwell.*)\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
