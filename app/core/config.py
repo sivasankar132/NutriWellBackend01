@@ -19,12 +19,24 @@ class Settings(BaseModel):
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     
     # CORS
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://nutri-well-frontend01.vercel.app,http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://localhost:4173")
     
     @property
     def cors_origins(self) -> List[str]:
-        if not self.FRONTEND_URL:
-            return ["*"]
-        return [origin.strip() for origin in self.FRONTEND_URL.split(",") if origin.strip()]
+        default_origins = [
+            "https://nutri-well-frontend01.vercel.app",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "http://localhost:4173",
+            "http://127.0.0.1:4173",
+        ]
+        origins_set = set(default_origins)
+        if self.FRONTEND_URL:
+            for url in self.FRONTEND_URL.split(","):
+                clean = url.strip().rstrip("/")
+                if clean:
+                    origins_set.add(clean)
+        return list(origins_set)
 
 settings = Settings()
