@@ -245,10 +245,12 @@ class ResilientTableQuery:
         self.table_name = table_name
         self.local_builder = LocalPgQueryBuilder(table_name)
         self.remote_builder = None
+        self._remote_error: Optional[Exception] = None
         try:
             client = get_supabase_client()
             self.remote_builder = client.table(table_name)
-        except Exception:
+        except Exception as e:
+            self._remote_error = e
             self.remote_builder = None
 
     def select(self, *args, **kwargs):
@@ -256,7 +258,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.select(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -265,7 +268,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.insert(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -274,7 +278,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.update(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -283,7 +288,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.delete(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -292,7 +298,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.eq(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -301,7 +308,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.neq(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -310,7 +318,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.gt(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -319,7 +328,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.gte(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -328,7 +338,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.lt(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -337,7 +348,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.lte(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -346,7 +358,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.like(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -355,7 +368,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.ilike(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -364,7 +378,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.in_(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -373,7 +388,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.is_(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -382,7 +398,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.order(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -391,7 +408,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.limit(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -400,7 +418,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.range(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -409,7 +428,8 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.single(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
@@ -418,22 +438,31 @@ class ResilientTableQuery:
         if self.remote_builder:
             try:
                 self.remote_builder = self.remote_builder.maybe_single(*args, **kwargs)
-            except Exception:
+            except Exception as e:
+                self._remote_error = e
                 self.remote_builder = None
         return self
 
     def execute(self):
+        remote_err = self._remote_error
         if self.remote_builder:
             try:
                 res = self.remote_builder.execute()
                 print(f"[DB_SOURCE: SUPABASE_PRIMARY] Table='{self.table_name}' Action='{self.local_builder._action}' Status=SUCCESS")
                 return res
             except Exception as e:
+                remote_err = e
                 err_str = str(e)
-                print(f"[DB_SOURCE: LOCAL_POSTGRES_FALLBACK] Table='{self.table_name}' Action='{self.local_builder._action}' Reason='{err_str[:120]}'")
-                return self.local_builder.execute()
-        print(f"[DB_SOURCE: LOCAL_POSTGRES_FALLBACK] Table='{self.table_name}' Action='{self.local_builder._action}' Reason='No remote builder'")
-        return self.local_builder.execute()
+                print(f"[DB_SOURCE: LOCAL_POSTGRES_FALLBACK_ATTEMPT] Table='{self.table_name}' Action='{self.local_builder._action}' Reason='{err_str[:120]}'")
+
+        try:
+            res = self.local_builder.execute()
+            print(f"[DB_SOURCE: LOCAL_POSTGRES_FALLBACK] Table='{self.table_name}' Action='{self.local_builder._action}' Status=SUCCESS")
+            return res
+        except Exception as local_err:
+            if remote_err:
+                raise remote_err
+            raise local_err
 
 
 class DynamicSupabaseProxy:
