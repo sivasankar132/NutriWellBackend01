@@ -1,6 +1,4 @@
 import uuid
-import psycopg2
-import psycopg2.extras
 from typing import Optional, Any, Dict, List
 from fastapi import HTTPException, status
 from supabase import create_client, Client
@@ -46,6 +44,10 @@ class LocalPgQueryBuilder:
         self._payload: Any = None
 
     def _get_conn(self):
+        try:
+            import psycopg2
+        except ImportError:
+            raise RuntimeError("psycopg2 is not installed. Local PostgreSQL fallback is unavailable.")
         conn = psycopg2.connect(
             dbname="nutriwell",
             user="postgres",
@@ -151,6 +153,10 @@ class LocalPgQueryBuilder:
         return cleaned
 
     def execute(self):
+        try:
+            import psycopg2.extras
+        except ImportError:
+            raise RuntimeError("psycopg2 is not installed. Local PostgreSQL fallback is unavailable.")
         conn = self._get_conn()
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         try:
